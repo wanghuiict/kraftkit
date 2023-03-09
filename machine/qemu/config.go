@@ -32,6 +32,7 @@
 package qemu
 
 import "strings"
+import "fmt"
 
 type QemuConfig struct {
 	// Command-line arguments for qemu-system-*
@@ -65,6 +66,9 @@ type QemuConfig struct {
 
 	// Command-line arguments for qemu-system-i386 and qemu-system-x86_64 only
 	NoHPET bool `flag:"-no-hpet" json:"no_hpet,omitempty"`
+
+	Fsdev     string            `flag:"-fsdev"      json:"fsdev,omitempty"`
+	Netdev    string            `flag:"-netdev"      json:"netdev,omitempty"`
 }
 
 type QemuOption func(*QemuConfig) error
@@ -84,6 +88,21 @@ func NewQemuConfig(qopts ...QemuOption) (*QemuConfig, error) {
 func WithAppend(append ...string) QemuOption {
 	return func(qc *QemuConfig) error {
 		qc.Append = qc.Append + " " + strings.Join(append, " ")
+		fmt.Printf("qc.Append:[%s]\n", qc.Append);
+		return nil
+	}
+}
+
+func WithFsdev(fsdev string) QemuOption {
+	return func(qc *QemuConfig) error {
+		qc.Fsdev = qc.Fsdev + fsdev
+		return nil
+	}
+}
+
+func WithNetdev(netdev string) QemuOption {
+	return func(qc *QemuConfig) error {
+		qc.Netdev = qc.Netdev + netdev
 		return nil
 	}
 }

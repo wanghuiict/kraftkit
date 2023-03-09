@@ -5,6 +5,7 @@
 package qemu
 
 import (
+	"reflect"
 	"context"
 	"encoding/gob"
 	"errors"
@@ -353,7 +354,7 @@ func init() {
 	// gob.Register(QemuDeviceTulip{})
 	// gob.Register(QemuDeviceUsbNet{})
 	// gob.Register(QemuDeviceVirtioNetDevice{})
-	// gob.Register(QemuDeviceVirtioNetPci{})
+	gob.Register(QemuDeviceVirtioNetPci{})
 	// gob.Register(QemuDeviceVirtioNetPciNonTransitional{})
 	// gob.Register(QemuDeviceVirtioNetPciTransitional{})
 	// gob.Register(QemuDeviceVmxnet3{})
@@ -419,7 +420,7 @@ func init() {
 	// gob.Register(QemuDeviceVhostUserScsiPciNonTransitional{})
 	// gob.Register(QemuDeviceVhostUserScsiPciTransitional{})
 	// gob.Register(QemuDeviceVirtio9pDevice{})
-	// gob.Register(QemuDeviceVirtio9pPci{})
+	gob.Register(QemuDeviceVirtio9pPci{})
 	// gob.Register(QemuDeviceVirtio9pPciNonTransitional{})
 	// gob.Register(QemuDeviceVirtio9pPciTransitional{})
 	// gob.Register(QemuDeviceVirtioBlkDevice{})
@@ -621,6 +622,24 @@ func (qd *QemuDriver) Create(ctx context.Context, opts ...machine.MachineOption)
 
 	default:
 		return machine.NullMachineID, fmt.Errorf("unsupported architecture: %s", mcfg.Architecture)
+	}
+
+	qopts = append(qopts,
+		WithFsdev("local,id=myid,path=/home/wanghui/Projects/kraft-test/my-unikernel/apps/app-nginx/fs0,security_model=none"),
+		WithDevice(QemuDeviceVirtio9pPci{
+			Fsdev:         "myid",
+			MountTag:      "fs0",
+			DisableModern: true,
+			DisableLegacy: QemuDeviceOptOff,
+		}),
+		WithNetdev("bridge,id=en0,br=virbr0"),
+		WithDevice(QemuDeviceVirtioNetPci{
+			Netdev:        "en0",
+		}),
+	)
+
+	for _, value := range qopts{
+		fmt.Println(reflect.TypeOf(value));
 	}
 
 	qcfg, err := NewQemuConfig(qopts...)
