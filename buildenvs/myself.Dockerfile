@@ -12,12 +12,14 @@ ARG BIN=kraft
 ARG GO_VERSION=${GO_VERSION}
 
 RUN set -xe; \
+    sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
       build-essential \
       cmake \
       make \
       git; \
+    go env -w GOPROXY=https://goproxy.cn; \
     go install mvdan.cc/gofumpt@latest; \
     git config --global --add safe.directory /go/src/kraftkit.sh;
 
