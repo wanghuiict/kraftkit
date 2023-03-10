@@ -67,6 +67,12 @@ type MachineConfig struct {
 	// Arguments are the list of arguments to pass to the kernel
 	Arguments []string `json:"arguments,omitempty"`
 
+	// Qemu: -fsdev local,path=<arg>
+	FsdevPath string `json:"fsdev_path,omitempty"`
+
+	// Qemu: -netdev bridge,br=<arg>
+	NetdevBridge string `json:"netdev_bridge,omitempty"`
+
 	// InitrdPath is the guest initrd image host path.
 	// ImagePath and InitrdPath cannot be set at the same time.
 	InitrdPath string `json:"initrd_path,omitempty"`
@@ -182,6 +188,20 @@ func WithKernel(kernel string) MachineOption {
 func WithArguments(arguments []string) MachineOption {
 	return func(mo *MachineConfig) error {
 		mo.Arguments = arguments
+		return nil
+	}
+}
+
+func WithFsdevPath(path string) MachineOption {
+	return func(mo *MachineConfig) error {
+		mo.FsdevPath = path
+		return nil
+	}
+}
+
+func WithNetdevBridge(br string) MachineOption {
+	return func(mo *MachineConfig) error {
+		mo.NetdevBridge = br
 		return nil
 	}
 }

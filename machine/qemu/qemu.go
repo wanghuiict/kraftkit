@@ -624,19 +624,26 @@ func (qd *QemuDriver) Create(ctx context.Context, opts ...machine.MachineOption)
 		return machine.NullMachineID, fmt.Errorf("unsupported architecture: %s", mcfg.Architecture)
 	}
 
-	qopts = append(qopts,
-		WithFsdev("local,id=myid,path=/home/wanghui/Projects/kraft-test/my-unikernel/apps/app-nginx/fs0,security_model=none"),
-		WithDevice(QemuDeviceVirtio9pPci{
-			Fsdev:         "myid",
-			MountTag:      "fs0",
-			DisableModern: true,
-			DisableLegacy: QemuDeviceOptOff,
-		}),
-		WithNetdev("bridge,id=en0,br=virbr0"),
-		WithDevice(QemuDeviceVirtioNetPci{
-			Netdev:        "en0",
-		}),
-	)
+	if len(mcfg.FsdevPath) > 0 {
+		qopts = append(qopts,
+			WithFsdev("local,id=myid,path=" + mcfg.FsdevPath + ",security_model=none"),
+			WithDevice(QemuDeviceVirtio9pPci{
+				Fsdev:         "myid",
+				MountTag:      filepath.Base(mcfg.FsdevPath),
+				DisableModern: true,
+				DisableLegacy: QemuDeviceOptOff,
+			}),
+		)
+	}
+
+	if len(mcfg.NetdevBridge) > 0 {
+		qopts = append(qopts,
+			WithNetdev("bridge,id=en0,br=" + mcfg.NetdevBridge),
+			WithDevice(QemuDeviceVirtioNetPci{
+				Netdev:        "en0",
+			}),
+		)
+	}
 
 	for _, value := range qopts{
 		fmt.Println(reflect.TypeOf(value));

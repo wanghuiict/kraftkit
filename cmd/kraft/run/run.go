@@ -36,6 +36,8 @@ type Run struct {
 	Architecture  string `long:"arch" short:"m" usage:"Set the architecture"`
 	Detach        bool   `long:"detach" short:"d" usage:"Run unikernel in background"`
 	DisableAccel  bool   `long:"disable-acceleration" short:"W" usage:"Disable acceleration of CPU (usually enables TCG)"`
+	LocalFsdev    string  `long:"local-fsdev" usage:"Set \"-fsdev local,path=<string>...\""`
+	BridgeNetdev  string  `long:"bridge-netdev" usage:"Set \"-netdev bridge,br=<string>...\""`
 	Hypervisor    string
 	Memory        int      `long:"memory" short:"M" usage:"Assign MB memory to the unikernel"`
 	NoMonitor     bool     `long:"no-monitor" usage:"Do not spawn a (or attach to an existing) an instance monitor"`
@@ -267,6 +269,8 @@ func (opts *Run) Run(cmd *cobra.Command, args []string) error {
 	mopts = append(mopts,
 		machine.WithMemorySize(uint64(opts.Memory)),
 		machine.WithArguments(kernelArgs),
+		machine.WithFsdevPath(opts.LocalFsdev),
+		machine.WithNetdevBridge(opts.BridgeNetdev),
 	)
 
 	// Create the machine
